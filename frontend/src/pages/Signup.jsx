@@ -1,6 +1,12 @@
 import React, { useState } from "react";
+import { toast } from "react-toastify";
+import  axios from  "axios"
+import { useNavigate ,Link} from "react-router-dom";
 
 const Signup = () => {
+    const navigate = useNavigate();
+
+
     const [signupInfo, setSignupInfo] = useState({
         name: "",
         email: "",
@@ -10,24 +16,46 @@ const Signup = () => {
       const handleChange = (e) => {
         const { name, value } = e.target;
         console.log(name, value);
-        setSignupInfo((prev) => ({
-          ...prev,
-          [name]: value 
-        }));
+        const  copySignup = {...signupInfo}
+        copySignup[name] = value;
+        setSignupInfo(copySignup)
       };
       
-      console.log("signupinfo - ", signupInfo);
       
-      const handlerSignup = (e) => {
+      const handlerSignup = async (e) => {
         e.preventDefault();
-        console.log("Form submitted with data: ", signupInfo);
-      
-        // Reset the form fields after submission
-        setSignupInfo({
-          name: "",
-          email: "",
-          password: ""
-        });
+        const {name , email ,password} =  signupInfo
+        if(!name || !email || !password){
+            return toast.error("All field is  Requaired !")
+        }
+        try {
+             const  url =  "http://localhost:5000/auth/signup";
+             const response = await axios.post(url, signupInfo, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            setSignupInfo({
+                name: "",
+                email: "",
+                password: ""
+            })
+            toast.success("Signup successful!");
+            setTimeout(() => {
+                navigate('/login');
+            }, 2000);
+            
+        } catch (error) {
+            console.error("Error:", error.response?.data || error.message);
+            if (error.response?.data?.error?.details) {
+                const details = error.response.data.error.details;
+                details.forEach(detail => {
+                    toast.error(detail.message || "Validation Error");
+                });
+            } else {
+                toast.error(error.response?.data?.message || "Something went wrong!");
+            }
+        }
       };
 
     
@@ -90,7 +118,7 @@ const Signup = () => {
 
         {/* Footer */}
         <div className="mt-4 text-center text-sm text-gray-600">
-          Already have an account? <a href="/" className="text-indigo-600 hover:underline">Login</a>
+          Already have an account? <Link to="/" className="text-indigo-600 hover:underline">Login</Link>
         </div>
       </div>
     </div>

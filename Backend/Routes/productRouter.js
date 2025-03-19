@@ -4,7 +4,7 @@ const router = require("express").Router()
 
 
 
-router.post("/" , isAuthenticated , (req, res)=>{
+router.get("/" , isAuthenticated , (req, res)=>{
     res.status(200).json([
         {name:"amit",age:12},
         {name:"ansu",age:20},
